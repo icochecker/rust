@@ -31,7 +31,7 @@
 pub use self::Level::*;
 pub use self::LintSource::*;
 
-use std::rc::Rc;
+use rustc_data_structures::sync::Lrc;
 
 use errors::{DiagnosticBuilder, DiagnosticId};
 use hir::def_id::{CrateNum, LOCAL_CRATE};
@@ -259,7 +259,13 @@ pub trait EarlyLintPass: LintPass {
 }
 
 /// A lint pass boxed up as a trait object.
+#[cfg(parallel_queries)]
+pub type EarlyLintPassObject = Box<EarlyLintPass + Send + Sync + 'static>;
+#[cfg(parallel_queries)]
+pub type LateLintPassObject = Box<for<'a, 'tcx> LateLintPass<'a, 'tcx> + Send + Sync + 'static>;
+#[cfg(not(parallel_queries))]
 pub type EarlyLintPassObject = Box<EarlyLintPass + 'static>;
+#[cfg(not(parallel_queries))]
 pub type LateLintPassObject = Box<for<'a, 'tcx> LateLintPass<'a, 'tcx> + 'static>;
 
 /// Identifies a lint known to the compiler.
@@ -481,7 +487,7 @@ pub fn struct_lint_level<'a>(sess: &'a Session,
 }
 
 fn lint_levels<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>, cnum: CrateNum)
-    -> Rc<LintLevelMap>
+    -> Lrc<LintLevelMap>
 {
     assert_eq!(cnum, LOCAL_CRATE);
     let mut builder = LintLevelMapBuilder {
@@ -494,7 +500,7 @@ fn lint_levels<'a, 'tcx>(tcx: TyCtxt<'a, 'tcx, 'tcx>, cnum: CrateNum)
         intravisit::walk_crate(builder, krate);
     });
 
-    Rc::new(builder.levels.build_map())
+    Lrc::new(builder.levels.build_map())
 }
 
 struct LintLevelMapBuilder<'a, 'tcx: 'a> {
