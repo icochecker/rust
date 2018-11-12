@@ -14,52 +14,53 @@
 use hir;
 use hir::map::DefPathHash;
 use hir::def_id::{DefId, LocalDefId, CrateNum, CRATE_DEF_INDEX};
-use ich::{StableHashingContext, NodeIdHashingMode};
+use ich::{StableHashingContext, NodeIdHashingMode, Fingerprint};
 use rustc_data_structures::stable_hasher::{HashStable, ToStableHashKey,
                                            StableHasher, StableHasherResult};
 use std::mem;
 use syntax::ast;
+use syntax::attr;
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for DefId {
+impl<'a> HashStable<StableHashingContext<'a>> for DefId {
     #[inline]
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.def_path_hash(*self).hash_stable(hcx, hasher);
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for DefId {
+impl<'a> ToStableHashKey<StableHashingContext<'a>> for DefId {
     type KeyType = DefPathHash;
 
     #[inline]
-    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'gcx>) -> DefPathHash {
+    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'a>) -> DefPathHash {
         hcx.def_path_hash(*self)
     }
 }
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for LocalDefId {
+impl<'a> HashStable<StableHashingContext<'a>> for LocalDefId {
     #[inline]
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.def_path_hash(self.to_def_id()).hash_stable(hcx, hasher);
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for LocalDefId {
+impl<'a> ToStableHashKey<StableHashingContext<'a>> for LocalDefId {
     type KeyType = DefPathHash;
 
     #[inline]
-    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'gcx>) -> DefPathHash {
+    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'a>) -> DefPathHash {
         hcx.def_path_hash(self.to_def_id())
     }
 }
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for CrateNum {
+impl<'a> HashStable<StableHashingContext<'a>> for CrateNum {
     #[inline]
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.def_path_hash(DefId {
             krate: *self,
@@ -68,11 +69,11 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for CrateNum {
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for CrateNum {
+impl<'a> ToStableHashKey<StableHashingContext<'a>> for CrateNum {
     type KeyType = DefPathHash;
 
     #[inline]
-    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'gcx>) -> DefPathHash {
+    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'a>) -> DefPathHash {
         let def_id = DefId { krate: *self, index: CRATE_DEF_INDEX };
         def_id.to_stable_hash_key(hcx)
     }
@@ -80,13 +81,13 @@ impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for CrateNum {
 
 impl_stable_hash_for!(tuple_struct hir::ItemLocalId { index });
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>>
+impl<'a> ToStableHashKey<StableHashingContext<'a>>
 for hir::ItemLocalId {
     type KeyType = hir::ItemLocalId;
 
     #[inline]
     fn to_stable_hash_key(&self,
-                          _: &StableHashingContext<'gcx>)
+                          _: &StableHashingContext<'a>)
                           -> hir::ItemLocalId {
         *self
     }
@@ -99,9 +100,9 @@ for hir::ItemLocalId {
 // want to pick up on a reference changing its target, so we hash the NodeIds
 // in "DefPath Mode".
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ItemId {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::ItemId {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::ItemId {
             id
@@ -113,9 +114,9 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ItemId {
     }
 }
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::TraitItemId {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::TraitItemId {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::TraitItemId {
             node_id
@@ -127,9 +128,9 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::TraitItemId {
     }
 }
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ImplItemId {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::ImplItemId {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::ImplItemId {
             node_id
@@ -141,24 +142,28 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ImplItemId {
     }
 }
 
+impl_stable_hash_for!(enum hir::ParamName {
+    Plain(name),
+    Fresh(index),
+    Error,
+});
+
 impl_stable_hash_for!(enum hir::LifetimeName {
+    Param(param_name),
     Implicit,
     Underscore,
     Static,
-    Name(name)
+    Error,
+});
+
+impl_stable_hash_for!(struct hir::Label {
+    ident
 });
 
 impl_stable_hash_for!(struct hir::Lifetime {
     id,
     span,
     name
-});
-
-impl_stable_hash_for!(struct hir::LifetimeDef {
-    lifetime,
-    bounds,
-    pure_wrt_drop,
-    in_band
 });
 
 impl_stable_hash_for!(struct hir::Path {
@@ -168,21 +173,27 @@ impl_stable_hash_for!(struct hir::Path {
 });
 
 impl_stable_hash_for!(struct hir::PathSegment {
-    name,
+    ident -> (ident.name),
+    id,
+    def,
     infer_types,
-    parameters
+    args
 });
 
-impl_stable_hash_for!(struct hir::PathParameters {
-    lifetimes,
-    types,
+impl_stable_hash_for!(enum hir::GenericArg {
+    Lifetime(lt),
+    Type(ty)
+});
+
+impl_stable_hash_for!(struct hir::GenericArgs {
+    args,
     bindings,
     parenthesized
 });
 
-impl_stable_hash_for!(enum hir::TyParamBound {
-    TraitTyParamBound(poly_trait_ref, trait_bound_modifier),
-    RegionTyParamBound(lifetime)
+impl_stable_hash_for!(enum hir::GenericBound {
+    Trait(poly_trait_ref, trait_bound_modifier),
+    Outlives(lifetime)
 });
 
 impl_stable_hash_for!(enum hir::TraitBoundModifier {
@@ -190,19 +201,42 @@ impl_stable_hash_for!(enum hir::TraitBoundModifier {
     Maybe
 });
 
-impl_stable_hash_for!(struct hir::TyParam {
-    name,
+impl_stable_hash_for!(struct hir::GenericParam {
     id,
-    bounds,
-    default,
-    span,
+    name,
     pure_wrt_drop,
-    synthetic
+    attrs,
+    bounds,
+    span,
+    kind
 });
 
+impl_stable_hash_for!(enum hir::LifetimeParamKind {
+    Explicit,
+    InBand,
+    Elided,
+    Error,
+});
+
+impl<'a> HashStable<StableHashingContext<'a>> for hir::GenericParamKind {
+    fn hash_stable<W: StableHasherResult>(&self,
+                                          hcx: &mut StableHashingContext<'a>,
+                                          hasher: &mut StableHasher<W>) {
+        mem::discriminant(self).hash_stable(hcx, hasher);
+        match self {
+            hir::GenericParamKind::Lifetime { kind } => {
+                kind.hash_stable(hcx, hasher);
+            }
+            hir::GenericParamKind::Type { ref default, synthetic } => {
+                default.hash_stable(hcx, hasher);
+                synthetic.hash_stable(hcx, hasher);
+            }
+        }
+    }
+}
+
 impl_stable_hash_for!(struct hir::Generics {
-    lifetimes,
-    ty_params,
+    params,
     where_clause,
     span
 });
@@ -224,7 +258,7 @@ impl_stable_hash_for!(enum hir::WherePredicate {
 
 impl_stable_hash_for!(struct hir::WhereBoundPredicate {
     span,
-    bound_lifetimes,
+    bound_generic_params,
     bounded_ty,
     bounds
 });
@@ -248,22 +282,27 @@ impl_stable_hash_for!(struct hir::MutTy {
 });
 
 impl_stable_hash_for!(struct hir::MethodSig {
-    unsafety,
-    constness,
-    abi,
+    header,
     decl
 });
 
 impl_stable_hash_for!(struct hir::TypeBinding {
     id,
-    name,
+    ident -> (ident.name),
     ty,
     span
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Ty {
+impl_stable_hash_for!(struct hir::FnHeader {
+    unsafety,
+    constness,
+    asyncness,
+    abi
+});
+
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Ty {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.while_hashing_hir_bodies(true, |hcx| {
             let hir::Ty {
@@ -280,49 +319,49 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Ty {
 }
 
 impl_stable_hash_for!(enum hir::PrimTy {
-    TyInt(int_ty),
-    TyUint(uint_ty),
-    TyFloat(float_ty),
-    TyStr,
-    TyBool,
-    TyChar
+    Int(int_ty),
+    Uint(uint_ty),
+    Float(float_ty),
+    Str,
+    Bool,
+    Char
 });
 
 impl_stable_hash_for!(struct hir::BareFnTy {
     unsafety,
     abi,
-    lifetimes,
+    generic_params,
     decl,
     arg_names
 });
 
 impl_stable_hash_for!(struct hir::ExistTy {
     generics,
+    impl_trait_fn,
     bounds
 });
 
-impl_stable_hash_for!(enum hir::Ty_ {
-    TySlice(t),
-    TyArray(t, body_id),
-    TyPtr(t),
-    TyRptr(lifetime, t),
-    TyBareFn(t),
-    TyNever,
-    TyTup(ts),
-    TyPath(qpath),
-    TyTraitObject(trait_refs, lifetime),
-    TyImplTraitExistential(existty, lifetimes),
-    TyImplTraitUniversal(def_id, bounds),
-    TyTypeof(body_id),
-    TyErr,
-    TyInfer
+impl_stable_hash_for!(enum hir::TyKind {
+    Slice(t),
+    Array(t, body_id),
+    Ptr(t),
+    Rptr(lifetime, t),
+    BareFn(t),
+    Never,
+    Tup(ts),
+    Path(qpath),
+    Def(it, lt),
+    TraitObject(trait_refs, lifetime),
+    Typeof(body_id),
+    Err,
+    Infer
 });
 
 impl_stable_hash_for!(struct hir::FnDecl {
     inputs,
     output,
     variadic,
-    has_implicit_self
+    implicit_self
 });
 
 impl_stable_hash_for!(enum hir::FunctionRetTy {
@@ -330,23 +369,23 @@ impl_stable_hash_for!(enum hir::FunctionRetTy {
     Return(t)
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::TraitRef {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let hir::TraitRef {
-            ref path,
-            // Don't hash the ref_id. It is tracked via the thing it is used to access
-            ref_id: _,
-        } = *self;
+impl_stable_hash_for!(enum hir::ImplicitSelfKind {
+    Imm,
+    Mut,
+    ImmRef,
+    MutRef,
+    None
+});
 
-        path.hash_stable(hcx, hasher);
-    }
-}
-
+impl_stable_hash_for!(struct hir::TraitRef {
+    // Don't hash the ref_id. It is tracked via the thing it is used to access
+    ref_id -> _,
+    hir_ref_id -> _,
+    path,
+});
 
 impl_stable_hash_for!(struct hir::PolyTraitRef {
-    bound_lifetimes,
+    bound_generic_params,
     trait_ref,
     span
 });
@@ -366,51 +405,31 @@ impl_stable_hash_for!(struct hir::MacroDef {
     body
 });
 
+impl_stable_hash_for!(struct hir::Block {
+    stmts,
+    expr,
+    id -> _,
+    hir_id -> _,
+    rules,
+    span,
+    targeted_by_break,
+    recovered,
+});
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Block {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let hir::Block {
-            ref stmts,
-            ref expr,
-            id: _,
-            hir_id: _,
-            rules,
-            span,
-            targeted_by_break,
-        } = *self;
-
-        stmts.hash_stable(hcx, hasher);
-        expr.hash_stable(hcx, hasher);
-        rules.hash_stable(hcx, hasher);
-        span.hash_stable(hcx, hasher);
-        targeted_by_break.hash_stable(hcx, hasher);
-    }
-}
-
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Pat {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let hir::Pat {
-            id: _,
-            hir_id: _,
-            ref node,
-            ref span
-        } = *self;
-
-
-        node.hash_stable(hcx, hasher);
-        span.hash_stable(hcx, hasher);
-    }
-}
+impl_stable_hash_for!(struct hir::Pat {
+    id -> _,
+    hir_id -> _,
+    node,
+    span,
+});
 
 impl_stable_hash_for_spanned!(hir::FieldPat);
+
 impl_stable_hash_for!(struct hir::FieldPat {
-    name,
+    id -> _,
+    ident -> (ident.name),
     pat,
-    is_shorthand
+    is_shorthand,
 });
 
 impl_stable_hash_for!(enum hir::BindingAnnotation {
@@ -439,28 +458,28 @@ impl_stable_hash_for!(enum hir::PatKind {
     Slice(one, two, three)
 });
 
-impl_stable_hash_for!(enum hir::BinOp_ {
-    BiAdd,
-    BiSub,
-    BiMul,
-    BiDiv,
-    BiRem,
-    BiAnd,
-    BiOr,
-    BiBitXor,
-    BiBitAnd,
-    BiBitOr,
-    BiShl,
-    BiShr,
-    BiEq,
-    BiLt,
-    BiLe,
-    BiNe,
-    BiGe,
-    BiGt
+impl_stable_hash_for!(enum hir::BinOpKind {
+    Add,
+    Sub,
+    Mul,
+    Div,
+    Rem,
+    And,
+    Or,
+    BitXor,
+    BitAnd,
+    BitOr,
+    Shl,
+    Shr,
+    Eq,
+    Lt,
+    Le,
+    Ne,
+    Ge,
+    Gt
 });
 
-impl_stable_hash_for_spanned!(hir::BinOp_);
+impl_stable_hash_for_spanned!(hir::BinOpKind);
 
 impl_stable_hash_for!(enum hir::UnOp {
     UnDeref,
@@ -468,7 +487,7 @@ impl_stable_hash_for!(enum hir::UnOp {
     UnNeg
 });
 
-impl_stable_hash_for_spanned!(hir::Stmt_);
+impl_stable_hash_for_spanned!(hir::StmtKind);
 
 impl_stable_hash_for!(struct hir::Local {
     pat,
@@ -481,10 +500,10 @@ impl_stable_hash_for!(struct hir::Local {
     source
 });
 
-impl_stable_hash_for_spanned!(hir::Decl_);
-impl_stable_hash_for!(enum hir::Decl_ {
-    DeclLocal(local),
-    DeclItem(item_id)
+impl_stable_hash_for_spanned!(hir::DeclKind);
+impl_stable_hash_for!(enum hir::DeclKind {
+    Local(local),
+    Item(item_id)
 });
 
 impl_stable_hash_for!(struct hir::Arm {
@@ -494,11 +513,16 @@ impl_stable_hash_for!(struct hir::Arm {
     body
 });
 
+impl_stable_hash_for!(enum hir::Guard {
+    If(expr),
+});
+
 impl_stable_hash_for!(struct hir::Field {
-    name,
+    id -> _,
+    ident,
     expr,
     span,
-    is_shorthand
+    is_shorthand,
 });
 
 impl_stable_hash_for_spanned!(ast::Name);
@@ -516,9 +540,15 @@ impl_stable_hash_for!(enum hir::UnsafeSource {
     UserProvided
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Expr {
+impl_stable_hash_for!(struct hir::AnonConst {
+    id,
+    hir_id,
+    body
+});
+
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Expr {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.while_hashing_hir_bodies(true, |hcx| {
             let hir::Expr {
@@ -529,98 +559,43 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Expr {
                 ref attrs
             } = *self;
 
-            let spans_always_on = match *node {
-                hir::ExprBox(..)        |
-                hir::ExprArray(..)      |
-                hir::ExprCall(..)       |
-                hir::ExprLit(..)        |
-                hir::ExprCast(..)       |
-                hir::ExprType(..)       |
-                hir::ExprIf(..)         |
-                hir::ExprWhile(..)      |
-                hir::ExprLoop(..)       |
-                hir::ExprMatch(..)      |
-                hir::ExprClosure(..)    |
-                hir::ExprBlock(..)      |
-                hir::ExprAssign(..)     |
-                hir::ExprTupField(..)   |
-                hir::ExprAddrOf(..)     |
-                hir::ExprBreak(..)      |
-                hir::ExprAgain(..)      |
-                hir::ExprRet(..)        |
-                hir::ExprYield(..)      |
-                hir::ExprInlineAsm(..)  |
-                hir::ExprRepeat(..)     |
-                hir::ExprTup(..)        |
-                hir::ExprMethodCall(..) |
-                hir::ExprPath(..)       |
-                hir::ExprStruct(..)     |
-                hir::ExprField(..)      => {
-                    // For these we only hash the span when debuginfo is on.
-                    false
-                }
-                // For the following, spans might be significant because of
-                // panic messages indicating the source location.
-                hir::ExprBinary(op, ..) => {
-                    hcx.binop_can_panic_at_runtime(op.node)
-                }
-                hir::ExprUnary(op, _) => {
-                    hcx.unop_can_panic_at_runtime(op)
-                }
-                hir::ExprAssignOp(op, ..) => {
-                    hcx.binop_can_panic_at_runtime(op.node)
-                }
-                hir::ExprIndex(..) => {
-                    true
-                }
-            };
-
-            if spans_always_on {
-                hcx.while_hashing_spans(true, |hcx| {
-                    span.hash_stable(hcx, hasher);
-                    node.hash_stable(hcx, hasher);
-                    attrs.hash_stable(hcx, hasher);
-                });
-            } else {
-                span.hash_stable(hcx, hasher);
-                node.hash_stable(hcx, hasher);
-                attrs.hash_stable(hcx, hasher);
-            }
+            span.hash_stable(hcx, hasher);
+            node.hash_stable(hcx, hasher);
+            attrs.hash_stable(hcx, hasher);
         })
     }
 }
 
-impl_stable_hash_for!(enum hir::Expr_ {
-    ExprBox(sub),
-    ExprArray(subs),
-    ExprCall(callee, args),
-    ExprMethodCall(segment, span, args),
-    ExprTup(fields),
-    ExprBinary(op, lhs, rhs),
-    ExprUnary(op, operand),
-    ExprLit(value),
-    ExprCast(expr, t),
-    ExprType(expr, t),
-    ExprIf(cond, then, els),
-    ExprWhile(cond, body, label),
-    ExprLoop(body, label, loop_src),
-    ExprMatch(matchee, arms, match_src),
-    ExprClosure(capture_clause, decl, body_id, span, gen),
-    ExprBlock(blk),
-    ExprAssign(lhs, rhs),
-    ExprAssignOp(op, lhs, rhs),
-    ExprField(owner, field_name),
-    ExprTupField(owner, idx),
-    ExprIndex(lhs, rhs),
-    ExprPath(path),
-    ExprAddrOf(mutability, sub),
-    ExprBreak(destination, sub),
-    ExprAgain(destination),
-    ExprRet(val),
-    ExprInlineAsm(asm, inputs, outputs),
-    ExprStruct(path, fields, base),
-    ExprRepeat(val, times),
-    ExprYield(val)
+impl_stable_hash_for!(enum hir::ExprKind {
+    Box(sub),
+    Array(subs),
+    Call(callee, args),
+    MethodCall(segment, span, args),
+    Tup(fields),
+    Binary(op, lhs, rhs),
+    Unary(op, operand),
+    Lit(value),
+    Cast(expr, t),
+    Type(expr, t),
+    If(cond, then, els),
+    While(cond, body, label),
+    Loop(body, label, loop_src),
+    Match(matchee, arms, match_src),
+    Closure(capture_clause, decl, body_id, span, gen),
+    Block(blk, label),
+    Assign(lhs, rhs),
+    AssignOp(op, lhs, rhs),
+    Field(owner, ident),
+    Index(lhs, rhs),
+    Path(path),
+    AddrOf(mutability, sub),
+    Break(destination, sub),
+    Continue(destination),
+    Ret(val),
+    InlineAsm(asm, inputs, outputs),
+    Struct(path, fields, base),
+    Repeat(val, times),
+    Yield(val)
 });
 
 impl_stable_hash_for!(enum hir::LocalSource {
@@ -634,9 +609,9 @@ impl_stable_hash_for!(enum hir::LoopSource {
     ForLoop
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::MatchSource {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::MatchSource {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         use hir::MatchSource;
 
@@ -655,6 +630,11 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::MatchSource {
     }
 }
 
+impl_stable_hash_for!(enum hir::GeneratorMovability {
+    Static,
+    Movable
+});
+
 impl_stable_hash_for!(enum hir::CaptureClause {
     CaptureByValue,
     CaptureByRef
@@ -663,16 +643,11 @@ impl_stable_hash_for!(enum hir::CaptureClause {
 impl_stable_hash_for_spanned!(usize);
 
 impl_stable_hash_for!(struct hir::Destination {
-    ident,
+    label,
     target_id
 });
 
 impl_stable_hash_for_spanned!(ast::Ident);
-
-impl_stable_hash_for!(enum hir::LoopIdResult {
-    Ok(node_id),
-    Err(loop_id_error)
-});
 
 impl_stable_hash_for!(enum hir::LoopIdError {
     OutsideLoopScope,
@@ -680,48 +655,27 @@ impl_stable_hash_for!(enum hir::LoopIdError {
     UnresolvedLabel
 });
 
-impl_stable_hash_for!(enum hir::ScopeTarget {
-    Block(node_id),
-    Loop(loop_id_result)
+impl_stable_hash_for!(struct ast::Ident {
+    name,
+    span,
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for ast::Ident {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::TraitItem {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let ast::Ident {
-            ref name,
-            ctxt: _ // Ignore this
-        } = *self;
-
-        name.hash_stable(hcx, hasher);
-    }
-}
-
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::TraitItem {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::TraitItem {
             id: _,
             hir_id: _,
-            name,
+            ident,
             ref attrs,
             ref generics,
             ref node,
             span
         } = *self;
 
-        let is_const = match *node {
-            hir::TraitItemKind::Const(..) |
-            hir::TraitItemKind::Type(..) => true,
-            hir::TraitItemKind::Method(hir::MethodSig { constness, .. }, _) => {
-                constness == hir::Constness::Const
-            }
-        };
-
-        hcx.hash_hir_item_like(attrs, is_const, |hcx| {
-            name.hash_stable(hcx, hasher);
+        hcx.hash_hir_item_like(|hcx| {
+            ident.name.hash_stable(hcx, hasher);
             attrs.hash_stable(hcx, hasher);
             generics.hash_stable(hcx, hasher);
             node.hash_stable(hcx, hasher);
@@ -741,14 +695,14 @@ impl_stable_hash_for!(enum hir::TraitItemKind {
     Type(bounds, rhs)
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ImplItem {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::ImplItem {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::ImplItem {
             id: _,
             hir_id: _,
-            name,
+            ident,
             ref vis,
             defaultness,
             ref attrs,
@@ -757,16 +711,8 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ImplItem {
             span
         } = *self;
 
-        let is_const = match *node {
-            hir::ImplItemKind::Const(..) |
-            hir::ImplItemKind::Type(..) => true,
-            hir::ImplItemKind::Method(hir::MethodSig { constness, .. }, _) => {
-                constness == hir::Constness::Const
-            }
-        };
-
-        hcx.hash_hir_item_like(attrs, is_const, |hcx| {
-            name.hash_stable(hcx, hasher);
+        hcx.hash_hir_item_like(|hcx| {
+            ident.name.hash_stable(hcx, hasher);
             vis.hash_stable(hcx, hasher);
             defaultness.hash_stable(hcx, hasher);
             attrs.hash_stable(hcx, hasher);
@@ -780,23 +726,32 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::ImplItem {
 impl_stable_hash_for!(enum hir::ImplItemKind {
     Const(t, body),
     Method(sig, body),
+    Existential(bounds),
     Type(t)
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Visibility {
+impl_stable_hash_for!(enum ::syntax::ast::CrateSugar {
+    JustCrate,
+    PubCrate,
+});
+
+impl<'a> HashStable<StableHashingContext<'a>> for hir::VisibilityKind {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         mem::discriminant(self).hash_stable(hcx, hasher);
         match *self {
-            hir::Visibility::Public |
-            hir::Visibility::Crate |
-            hir::Visibility::Inherited => {
+            hir::VisibilityKind::Public |
+            hir::VisibilityKind::Inherited => {
                 // No fields to hash.
             }
-            hir::Visibility::Restricted { ref path, id } => {
+            hir::VisibilityKind::Crate(sugar) => {
+                sugar.hash_stable(hcx, hasher);
+            }
+            hir::VisibilityKind::Restricted { ref path, id, hir_id } => {
                 hcx.with_node_id_hashing_mode(NodeIdHashingMode::HashDefPath, |hcx| {
                     id.hash_stable(hcx, hasher);
+                    hir_id.hash_stable(hcx, hasher);
                 });
                 path.hash_stable(hcx, hasher);
             }
@@ -804,9 +759,11 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Visibility {
     }
 }
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Defaultness {
+impl_stable_hash_for_spanned!(hir::VisibilityKind);
+
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Defaultness {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         mem::discriminant(self).hash_stable(hcx, hasher);
         match *self {
@@ -825,19 +782,32 @@ impl_stable_hash_for!(enum hir::ImplPolarity {
     Negative
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Mod {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Mod {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::Mod {
-            inner,
-            // We are not hashing the IDs of the items contained in the module.
-            // This is harmless and matches the current behavior but it's not
-            // actually correct. See issue #40876.
-            item_ids: _,
+            inner: ref inner_span,
+            ref item_ids,
         } = *self;
 
-        inner.hash_stable(hcx, hasher);
+        inner_span.hash_stable(hcx, hasher);
+
+        // Combining the DefPathHashes directly is faster than feeding them
+        // into the hasher. Because we use a commutative combine, we also don't
+        // have to sort the array.
+        let item_ids_hash = item_ids
+            .iter()
+            .map(|id| {
+                let (def_path_hash, local_id) = id.id.to_stable_hash_key(hcx);
+                debug_assert_eq!(local_id, hir::ItemLocalId(0));
+                def_path_hash.0
+            }).fold(Fingerprint::ZERO, |a, b| {
+                a.combine_commutative(b)
+            });
+
+        item_ids.len().hash_stable(hcx, hasher);
+        item_ids_hash.hash_stable(hcx, hasher);
     }
 }
 
@@ -850,14 +820,14 @@ impl_stable_hash_for!(struct hir::EnumDef {
     variants
 });
 
-impl_stable_hash_for!(struct hir::Variant_ {
+impl_stable_hash_for!(struct hir::VariantKind {
     name,
     attrs,
     data,
     disr_expr
 });
 
-impl_stable_hash_for_spanned!(hir::Variant_);
+impl_stable_hash_for_spanned!(hir::VariantKind);
 
 impl_stable_hash_for!(enum hir::UseKind {
     Single,
@@ -867,7 +837,7 @@ impl_stable_hash_for!(enum hir::UseKind {
 
 impl_stable_hash_for!(struct hir::StructField {
     span,
-    name,
+    ident -> (ident.name),
     vis,
     id,
     ty,
@@ -880,34 +850,10 @@ impl_stable_hash_for!(enum hir::VariantData {
     Unit(id)
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Item {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Item {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
-        let (is_const, hash_spans) = match self.node {
-            hir::ItemStatic(..)      |
-            hir::ItemConst(..)       => {
-                (true, hcx.hash_spans())
-            }
-            hir::ItemFn(_, _, constness, ..) => {
-                (constness == hir::Constness::Const, hcx.hash_spans())
-            }
-            hir::ItemUse(..)         |
-            hir::ItemExternCrate(..) |
-            hir::ItemForeignMod(..)  |
-            hir::ItemGlobalAsm(..)   |
-            hir::ItemMod(..)         |
-            hir::ItemAutoImpl(..) |
-            hir::ItemTrait(..)       |
-            hir::ItemImpl(..)        |
-            hir::ItemTy(..)          |
-            hir::ItemEnum(..)        |
-            hir::ItemStruct(..)      |
-            hir::ItemUnion(..)       => {
-                (false, false)
-            }
-        };
-
         let hir::Item {
             name,
             ref attrs,
@@ -918,39 +864,38 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Item {
             span
         } = *self;
 
-        hcx.hash_hir_item_like(attrs, is_const, |hcx| {
-            hcx.while_hashing_spans(hash_spans, |hcx| {
-                name.hash_stable(hcx, hasher);
-                attrs.hash_stable(hcx, hasher);
-                node.hash_stable(hcx, hasher);
-                vis.hash_stable(hcx, hasher);
-                span.hash_stable(hcx, hasher);
-            });
+        hcx.hash_hir_item_like(|hcx| {
+            name.hash_stable(hcx, hasher);
+            attrs.hash_stable(hcx, hasher);
+            node.hash_stable(hcx, hasher);
+            vis.hash_stable(hcx, hasher);
+            span.hash_stable(hcx, hasher);
         });
     }
 }
 
-impl_stable_hash_for!(enum hir::Item_ {
-    ItemExternCrate(name),
-    ItemUse(path, use_kind),
-    ItemStatic(ty, mutability, body_id),
-    ItemConst(ty, body_id),
-    ItemFn(fn_decl, unsafety, constness, abi, generics, body_id),
-    ItemMod(module),
-    ItemForeignMod(foreign_mod),
-    ItemGlobalAsm(global_asm),
-    ItemTy(ty, generics),
-    ItemEnum(enum_def, generics),
-    ItemStruct(variant_data, generics),
-    ItemUnion(variant_data, generics),
-    ItemTrait(is_auto, unsafety, generics, bounds, item_refs),
-    ItemAutoImpl(unsafety, trait_ref),
-    ItemImpl(unsafety, impl_polarity, impl_defaultness, generics, trait_ref, ty, impl_item_refs)
+impl_stable_hash_for!(enum hir::ItemKind {
+    ExternCrate(orig_name),
+    Use(path, use_kind),
+    Static(ty, mutability, body_id),
+    Const(ty, body_id),
+    Fn(fn_decl, header, generics, body_id),
+    Mod(module),
+    ForeignMod(foreign_mod),
+    GlobalAsm(global_asm),
+    Ty(ty, generics),
+    Existential(exist),
+    Enum(enum_def, generics),
+    Struct(variant_data, generics),
+    Union(variant_data, generics),
+    Trait(is_auto, unsafety, generics, bounds, item_refs),
+    TraitAlias(generics, bounds),
+    Impl(unsafety, impl_polarity, impl_defaultness, generics, trait_ref, ty, impl_item_refs)
 });
 
 impl_stable_hash_for!(struct hir::TraitItemRef {
     id,
-    name,
+    ident -> (ident.name),
     kind,
     span,
     defaultness
@@ -958,21 +903,21 @@ impl_stable_hash_for!(struct hir::TraitItemRef {
 
 impl_stable_hash_for!(struct hir::ImplItemRef {
     id,
-    name,
+    ident -> (ident.name),
     kind,
     span,
     vis,
     defaultness
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>>
-for hir::AssociatedItemKind {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::AssociatedItemKind {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         mem::discriminant(self).hash_stable(hcx, hasher);
         match *self {
             hir::AssociatedItemKind::Const |
+            hir::AssociatedItemKind::Existential |
             hir::AssociatedItemKind::Type => {
                 // No fields to hash.
             }
@@ -992,16 +937,16 @@ impl_stable_hash_for!(struct hir::ForeignItem {
     vis
 });
 
-impl_stable_hash_for!(enum hir::ForeignItem_ {
-    ForeignItemFn(fn_decl, arg_names, generics),
-    ForeignItemStatic(ty, is_mutbl),
-    ForeignItemType
+impl_stable_hash_for!(enum hir::ForeignItemKind {
+    Fn(fn_decl, arg_names, generics),
+    Static(ty, is_mutbl),
+    Type
 });
 
-impl_stable_hash_for!(enum hir::Stmt_ {
-    StmtDecl(decl, id),
-    StmtExpr(expr, id),
-    StmtSemi(expr, id)
+impl_stable_hash_for!(enum hir::StmtKind {
+    Decl(decl, id),
+    Expr(expr, id),
+    Semi(expr, id)
 });
 
 impl_stable_hash_for!(struct hir::Arg {
@@ -1010,9 +955,9 @@ impl_stable_hash_for!(struct hir::Arg {
     hir_id
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Body {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::Body {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         let hir::Body {
             ref arguments,
@@ -1028,12 +973,12 @@ impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::Body {
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for hir::BodyId {
+impl<'a> ToStableHashKey<StableHashingContext<'a>> for hir::BodyId {
     type KeyType = (DefPathHash, hir::ItemLocalId);
 
     #[inline]
     fn to_stable_hash_key(&self,
-                          hcx: &StableHashingContext<'gcx>)
+                          hcx: &StableHashingContext<'a>)
                           -> (DefPathHash, hir::ItemLocalId) {
         let hir::BodyId { node_id } = *self;
         node_id.to_stable_hash_key(hcx)
@@ -1043,48 +988,26 @@ impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for hir::BodyId {
 impl_stable_hash_for!(struct hir::InlineAsmOutput {
     constraint,
     is_rw,
-    is_indirect
+    is_indirect,
+    span
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::GlobalAsm {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let hir::GlobalAsm {
-            asm,
-            ctxt: _
-        } = *self;
+impl_stable_hash_for!(struct hir::GlobalAsm {
+    asm,
+    ctxt -> _, // This is used for error reporting
+});
 
-        asm.hash_stable(hcx, hasher);
-    }
-}
-
-impl<'gcx> HashStable<StableHashingContext<'gcx>> for hir::InlineAsm {
-    fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
-                                          hasher: &mut StableHasher<W>) {
-        let hir::InlineAsm {
-            asm,
-            asm_str_style,
-            ref outputs,
-            ref inputs,
-            ref clobbers,
-            volatile,
-            alignstack,
-            dialect,
-            ctxt: _, // This is used for error reporting
-        } = *self;
-
-        asm.hash_stable(hcx, hasher);
-        asm_str_style.hash_stable(hcx, hasher);
-        outputs.hash_stable(hcx, hasher);
-        inputs.hash_stable(hcx, hasher);
-        clobbers.hash_stable(hcx, hasher);
-        volatile.hash_stable(hcx, hasher);
-        alignstack.hash_stable(hcx, hasher);
-        dialect.hash_stable(hcx, hasher);
-    }
-}
+impl_stable_hash_for!(struct hir::InlineAsm {
+    asm,
+    asm_str_style,
+    outputs,
+    inputs,
+    clobbers,
+    volatile,
+    alignstack,
+    dialect,
+    ctxt -> _, // This is used for error reporting
+});
 
 impl_stable_hash_for!(enum hir::def::CtorKind {
     Fn,
@@ -1092,23 +1015,35 @@ impl_stable_hash_for!(enum hir::def::CtorKind {
     Fictive
 });
 
+impl_stable_hash_for!(enum hir::def::NonMacroAttrKind {
+    Builtin,
+    Tool,
+    DeriveHelper,
+    LegacyPluginHelper,
+    Custom,
+});
+
 impl_stable_hash_for!(enum hir::def::Def {
     Mod(def_id),
     Struct(def_id),
     Union(def_id),
     Enum(def_id),
+    Existential(def_id),
     Variant(def_id),
     Trait(def_id),
     TyAlias(def_id),
+    TraitAlias(def_id),
     AssociatedTy(def_id),
+    AssociatedExistential(def_id),
     PrimTy(prim_ty),
     TyParam(def_id),
     SelfTy(trait_def_id, impl_def_id),
-    TyForeign(def_id),
+    ForeignTy(def_id),
     Fn(def_id),
     Const(def_id),
     Static(def_id, is_mutbl),
     StructCtor(def_id, ctor_kind),
+    SelfCtor(impl_def_id),
     VariantCtor(def_id, ctor_kind),
     Method(def_id),
     AssociatedConst(def_id),
@@ -1116,7 +1051,8 @@ impl_stable_hash_for!(enum hir::def::Def {
     Upvar(def_id, index, expr_id),
     Label(node_id),
     Macro(def_id, macro_kind),
-    GlobalAsm(def_id),
+    ToolMod,
+    NonMacroAttr(attr_kind),
     Err
 });
 
@@ -1135,28 +1071,31 @@ impl_stable_hash_for!(enum hir::Unsafety {
     Normal
 });
 
+impl_stable_hash_for!(enum hir::IsAsync {
+    Async,
+    NotAsync
+});
 
 impl_stable_hash_for!(enum hir::Constness {
     Const,
     NotConst
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>>
-for hir::def_id::DefIndex {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::def_id::DefIndex {
 
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.local_def_path_hash(*self).hash_stable(hcx, hasher);
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>>
+impl<'a> ToStableHashKey<StableHashingContext<'a>>
 for hir::def_id::DefIndex {
     type KeyType = DefPathHash;
 
     #[inline]
-    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'gcx>) -> DefPathHash {
+    fn to_stable_hash_key(&self, hcx: &StableHashingContext<'a>) -> DefPathHash {
          hcx.local_def_path_hash(*self)
     }
 }
@@ -1164,13 +1103,18 @@ for hir::def_id::DefIndex {
 impl_stable_hash_for!(struct hir::def::Export {
     ident,
     def,
+    vis,
     span
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>>
-for ::middle::lang_items::LangItem {
+impl_stable_hash_for!(struct ::middle::lib_features::LibFeatures {
+    stable,
+    unstable
+});
+
+impl<'a> HashStable<StableHashingContext<'a>> for ::middle::lang_items::LangItem {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          _: &mut StableHashingContext<'gcx>,
+                                          _: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         ::std::hash::Hash::hash(self, hasher);
     }
@@ -1181,10 +1125,9 @@ impl_stable_hash_for!(struct ::middle::lang_items::LanguageItems {
     missing
 });
 
-impl<'gcx> HashStable<StableHashingContext<'gcx>>
-for hir::TraitCandidate {
+impl<'a> HashStable<StableHashingContext<'a>> for hir::TraitCandidate {
     fn hash_stable<W: StableHasherResult>(&self,
-                                          hcx: &mut StableHashingContext<'gcx>,
+                                          hcx: &mut StableHashingContext<'a>,
                                           hasher: &mut StableHasher<W>) {
         hcx.with_node_id_hashing_mode(NodeIdHashingMode::HashDefPath, |hcx| {
             let hir::TraitCandidate {
@@ -1198,11 +1141,11 @@ for hir::TraitCandidate {
     }
 }
 
-impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for hir::TraitCandidate {
+impl<'a> ToStableHashKey<StableHashingContext<'a>> for hir::TraitCandidate {
     type KeyType = (DefPathHash, Option<(DefPathHash, hir::ItemLocalId)>);
 
     fn to_stable_hash_key(&self,
-                          hcx: &StableHashingContext<'gcx>)
+                          hcx: &StableHashingContext<'a>)
                           -> Self::KeyType {
         let hir::TraitCandidate {
             def_id,
@@ -1216,6 +1159,32 @@ impl<'gcx> ToStableHashKey<StableHashingContext<'gcx>> for hir::TraitCandidate {
     }
 }
 
+impl_stable_hash_for!(struct hir::CodegenFnAttrs {
+    flags,
+    inline,
+    export_name,
+    link_name,
+    target_features,
+    linkage,
+    link_section,
+});
+
+impl<'hir> HashStable<StableHashingContext<'hir>> for hir::CodegenFnAttrFlags
+{
+    fn hash_stable<W: StableHasherResult>(&self,
+                                          hcx: &mut StableHashingContext<'hir>,
+                                          hasher: &mut StableHasher<W>) {
+        self.bits().hash_stable(hcx, hasher);
+    }
+}
+
+impl<'hir> HashStable<StableHashingContext<'hir>> for attr::InlineAttr {
+    fn hash_stable<W: StableHasherResult>(&self,
+                                          hcx: &mut StableHashingContext<'hir>,
+                                          hasher: &mut StableHasher<W>) {
+        mem::discriminant(self).hash_stable(hcx, hasher);
+    }
+}
 
 impl_stable_hash_for!(struct hir::Freevar {
     def,

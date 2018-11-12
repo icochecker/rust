@@ -14,9 +14,9 @@ trait ListItem<'a> {
 
 trait Collection { fn len(&self) -> usize; }
 
+// is now well formed. RFC 2093
 struct List<'a, T: ListItem<'a>> {
     slice: &'a [T]
-    //~^ ERROR may not live long enough
 }
 
 impl<'a, T: ListItem<'a>> Collection for List<'a, T> {
@@ -33,10 +33,18 @@ struct Foo<T> {
 trait X<K>: Sized {
     fn foo<'a, L: X<&'a Nested<K>>>();
     //~^ ERROR may not live long enough
+
     // check that we give a sane error for `Self`
     fn bar<'a, L: X<&'a Nested<Self>>>();
     //~^ ERROR may not live long enough
+
+    // check that we give a sane error for nested generics
+    fn baz<'a, L, M: X<&'a Nested<L>>>() {
+        //~^ ERROR may not live long enough
+    }
 }
+
+trait TraitB {}
 
 struct Nested<K>(K);
 impl<K> Nested<K> {

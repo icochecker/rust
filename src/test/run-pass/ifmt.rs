@@ -158,8 +158,8 @@ pub fn main() {
 
     // Float edge cases
     t!(format!("{}", -0.0), "0");
-    t!(format!("{:?}", -0.0), "-0");
-    t!(format!("{:?}", 0.0), "0");
+    t!(format!("{:?}", -0.0), "-0.0");
+    t!(format!("{:?}", 0.0), "0.0");
 
     // sign aware zero padding
     t!(format!("{:<3}", 1), "1  ");
@@ -310,7 +310,7 @@ fn test_order() {
 }
 
 fn test_once() {
-    // Make sure each argument are evaluted only once even though it may be
+    // Make sure each argument are evaluated only once even though it may be
     // formatted multiple times
     fn foo() -> isize {
         static mut FOO: isize = 0;

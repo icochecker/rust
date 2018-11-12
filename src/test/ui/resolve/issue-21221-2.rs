@@ -9,7 +9,6 @@
 // except according to those terms.
 
 pub mod foo {
-//~^ HELP you can import it into scope
     pub mod bar {
         // note: trait T is not public, but being in the current
         // crate, it's fine to show it, since the programmer can
@@ -28,3 +27,5 @@ pub mod baz {
 struct Foo;
 impl T for Foo { }
 //~^ ERROR cannot find trait `T`
+
+fn main() {}

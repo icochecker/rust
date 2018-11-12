@@ -13,9 +13,6 @@ pub trait ToNbt<T> {
 }
 
 impl ToNbt<Self> {}
-//~^ ERROR unsupported cyclic reference
-//~| NOTE cyclic reference
-//~| NOTE the cycle begins when processing
-//~| NOTE ...which then again requires
+//~^ ERROR cycle detected
 
 fn main() {}

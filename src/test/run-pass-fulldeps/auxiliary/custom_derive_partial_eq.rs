@@ -22,7 +22,7 @@ use deriving::generic::ty::*;
 
 use rustc_plugin::Registry;
 use syntax::ast::*;
-use syntax::codemap::Span;
+use syntax::source_map::Span;
 use syntax::ext::base::*;
 use syntax::ext::build::AstBuilder;
 use syntax::symbol::Symbol;
@@ -58,7 +58,7 @@ fn expand_deriving_partial_eq(cx: &mut ExtCtxt, span: Span, mitem: &MetaItem, it
         name: "eq",
         generics: LifetimeBounds::empty(),
         explicit_self: borrowed_explicit_self(),
-        args: vec![borrowed_self()],
+        args: vec![(borrowed_self(), "other")],
         ret_ty: Literal(deriving::generic::ty::Path::new_local("bool")),
         attributes: attrs,
         is_unsafe: false,
@@ -69,7 +69,7 @@ fn expand_deriving_partial_eq(cx: &mut ExtCtxt, span: Span, mitem: &MetaItem, it
     let trait_def = TraitDef {
         span: span,
         attributes: Vec::new(),
-        path: deriving::generic::ty::Path::new(vec!["std", "cmp", "PartialEq"]),
+        path: deriving::generic::ty::Path::new(vec!["cmp", "PartialEq"]),
         additional_bounds: Vec::new(),
         generics: LifetimeBounds::empty(),
         is_unsafe: false,

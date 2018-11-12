@@ -8,8 +8,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use deriving::path_std;
 use deriving::generic::*;
 use deriving::generic::ty::*;
+
+use rustc_data_structures::thin_vec::ThinVec;
 
 use syntax::ast::{self, Ident};
 use syntax::ast::{Expr, MetaItem};
@@ -22,15 +25,15 @@ pub fn expand_deriving_debug(cx: &mut ExtCtxt,
                              span: Span,
                              mitem: &MetaItem,
                              item: &Annotatable,
-                             push: &mut FnMut(Annotatable)) {
+                             push: &mut dyn FnMut(Annotatable)) {
     // &mut ::std::fmt::Formatter
-    let fmtr = Ptr(Box::new(Literal(path_std!(cx, core::fmt::Formatter))),
+    let fmtr = Ptr(Box::new(Literal(path_std!(cx, fmt::Formatter))),
                    Borrowed(None, ast::Mutability::Mutable));
 
     let trait_def = TraitDef {
         span,
         attributes: Vec::new(),
-        path: path_std!(cx, core::fmt::Debug),
+        path: path_std!(cx, fmt::Debug),
         additional_bounds: Vec::new(),
         generics: LifetimeBounds::empty(),
         is_unsafe: false,
@@ -39,8 +42,8 @@ pub fn expand_deriving_debug(cx: &mut ExtCtxt,
                           name: "fmt",
                           generics: LifetimeBounds::empty(),
                           explicit_self: borrowed_explicit_self(),
-                          args: vec![fmtr],
-                          ret_ty: Literal(path_std!(cx, core::fmt::Result)),
+                          args: vec![(fmtr, "f")],
+                          ret_ty: Literal(path_std!(cx, fmt::Result)),
                           attributes: Vec::new(),
                           is_unsafe: false,
                           unify_fieldless_variants: false,
@@ -60,7 +63,7 @@ fn show_substructure(cx: &mut ExtCtxt, span: Span, substr: &Substructure) -> P<E
     // based on the "shape".
     let (ident, is_struct) = match *substr.fields {
         Struct(vdata, _) => (substr.type_ident, vdata.is_struct()),
-        EnumMatching(_, _, v, _) => (v.node.name, v.node.data.is_struct()),
+        EnumMatching(_, _, v, _) => (v.node.ident, v.node.data.is_struct()),
         EnumNonMatchingCollapsed(..) |
         StaticStruct(..) |
         StaticEnum(..) => cx.span_bug(span, "nonsensical .fields in `#[derive(Debug)]`"),
@@ -69,7 +72,7 @@ fn show_substructure(cx: &mut ExtCtxt, span: Span, substr: &Substructure) -> P<E
     // We want to make sure we have the ctxt set so that we can use unstable methods
     let span = span.with_ctxt(cx.backtrace());
     let name = cx.expr_lit(span, ast::LitKind::Str(ident.name, ast::StrStyle::Cooked));
-    let builder = Ident::from_str("builder");
+    let builder = Ident::from_str("debug_trait_builder").gensym();
     let builder_expr = cx.expr_ident(span, builder.clone());
 
     let fmt = substr.nonself_args[0].clone();
@@ -138,7 +141,7 @@ fn stmt_let_undescore(cx: &mut ExtCtxt, sp: Span, expr: P<ast::Expr>) -> ast::St
         init: Some(expr),
         id: ast::DUMMY_NODE_ID,
         span: sp,
-        attrs: ast::ThinVec::new(),
+        attrs: ThinVec::new(),
     });
     ast::Stmt {
         id: ast::DUMMY_NODE_ID,

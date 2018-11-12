@@ -8,12 +8,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-// Test that we do some basic error correcton in the tokeniser (and don't ICE).
+// Test that we do some basic error correction in the tokeniser (and don't ICE).
 
 fn main() {
     if foo {
-    //~^ NOTE: unclosed delimiter
-    //~| ERROR: cannot find value `foo`
-    //~| NOTE: not found in this scope
+    //~^ ERROR: cannot find value `foo`
     ) //~ ERROR: incorrect close delimiter: `)`
 }

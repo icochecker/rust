@@ -1,148 +1,147 @@
 error[E0425]: cannot find function `baz` in this scope
   --> $DIR/issue-14254.rs:29:9
    |
-29 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `a` in this scope
   --> $DIR/issue-14254.rs:31:9
    |
-31 |         a;
+LL |         a;
    |         ^ not found in this scope
 
 error[E0425]: cannot find function `baz` in this scope
-  --> $DIR/issue-14254.rs:39:9
+  --> $DIR/issue-14254.rs:38:9
    |
-39 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `x` in this scope
-  --> $DIR/issue-14254.rs:41:9
+  --> $DIR/issue-14254.rs:40:9
    |
-41 |         x;
+LL |         x;
    |         ^ help: try: `self.x`
 
 error[E0425]: cannot find value `y` in this scope
-  --> $DIR/issue-14254.rs:43:9
+  --> $DIR/issue-14254.rs:42:9
    |
-43 |         y;
+LL |         y;
    |         ^ help: try: `self.y`
 
 error[E0425]: cannot find value `a` in this scope
-  --> $DIR/issue-14254.rs:45:9
+  --> $DIR/issue-14254.rs:44:9
    |
-45 |         a;
+LL |         a;
    |         ^ not found in this scope
 
 error[E0425]: cannot find value `bah` in this scope
+  --> $DIR/issue-14254.rs:46:9
+   |
+LL |         bah;
+   |         ^^^ help: try: `Self::bah`
+
+error[E0425]: cannot find value `b` in this scope
   --> $DIR/issue-14254.rs:48:9
    |
-48 |         bah;
-   |         ^^^ help: try: `Self::bah`
-
-error[E0425]: cannot find value `b` in this scope
-  --> $DIR/issue-14254.rs:50:9
-   |
-50 |         b;
+LL |         b;
    |         ^ not found in this scope
 
 error[E0425]: cannot find function `baz` in this scope
-  --> $DIR/issue-14254.rs:58:9
+  --> $DIR/issue-14254.rs:55:9
    |
-58 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `x` in this scope
-  --> $DIR/issue-14254.rs:60:9
+  --> $DIR/issue-14254.rs:57:9
    |
-60 |         x;
+LL |         x;
    |         ^ help: try: `self.x`
 
 error[E0425]: cannot find value `y` in this scope
-  --> $DIR/issue-14254.rs:62:9
+  --> $DIR/issue-14254.rs:59:9
    |
-62 |         y;
+LL |         y;
    |         ^ help: try: `self.y`
 
 error[E0425]: cannot find value `a` in this scope
-  --> $DIR/issue-14254.rs:64:9
+  --> $DIR/issue-14254.rs:61:9
    |
-64 |         a;
+LL |         a;
    |         ^ not found in this scope
 
 error[E0425]: cannot find value `bah` in this scope
-  --> $DIR/issue-14254.rs:67:9
+  --> $DIR/issue-14254.rs:63:9
    |
-67 |         bah;
+LL |         bah;
    |         ^^^ help: try: `Self::bah`
 
 error[E0425]: cannot find value `b` in this scope
-  --> $DIR/issue-14254.rs:69:9
+  --> $DIR/issue-14254.rs:65:9
    |
-69 |         b;
+LL |         b;
    |         ^ not found in this scope
 
 error[E0425]: cannot find function `baz` in this scope
-  --> $DIR/issue-14254.rs:77:9
+  --> $DIR/issue-14254.rs:72:9
    |
-77 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `bah` in this scope
-  --> $DIR/issue-14254.rs:79:9
+  --> $DIR/issue-14254.rs:74:9
    |
-79 |         bah;
+LL |         bah;
    |         ^^^ help: try: `Self::bah`
 
 error[E0425]: cannot find function `baz` in this scope
-  --> $DIR/issue-14254.rs:86:9
+  --> $DIR/issue-14254.rs:81:9
    |
-86 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `bah` in this scope
-  --> $DIR/issue-14254.rs:88:9
+  --> $DIR/issue-14254.rs:83:9
    |
-88 |         bah;
+LL |         bah;
    |         ^^^ help: try: `Self::bah`
 
 error[E0425]: cannot find function `baz` in this scope
-  --> $DIR/issue-14254.rs:95:9
+  --> $DIR/issue-14254.rs:90:9
    |
-95 |         baz();
+LL |         baz();
    |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `bah` in this scope
-  --> $DIR/issue-14254.rs:97:9
+  --> $DIR/issue-14254.rs:92:9
    |
-97 |         bah;
+LL |         bah;
    |         ^^^ help: try: `Self::bah`
 
 error[E0425]: cannot find function `baz` in this scope
-   --> $DIR/issue-14254.rs:104:9
-    |
-104 |         baz();
-    |         ^^^ help: try: `self.baz`
+  --> $DIR/issue-14254.rs:99:9
+   |
+LL |         baz();
+   |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `bah` in this scope
-   --> $DIR/issue-14254.rs:106:9
-    |
-106 |         bah;
-    |         ^^^ help: try: `Self::bah`
+  --> $DIR/issue-14254.rs:101:9
+   |
+LL |         bah;
+   |         ^^^ help: try: `Self::bah`
 
 error[E0425]: cannot find function `baz` in this scope
-   --> $DIR/issue-14254.rs:113:9
-    |
-113 |         baz();
-    |         ^^^ help: try: `self.baz`
+  --> $DIR/issue-14254.rs:108:9
+   |
+LL |         baz();
+   |         ^^^ help: try: `self.baz`
 
 error[E0425]: cannot find value `bah` in this scope
-   --> $DIR/issue-14254.rs:115:9
-    |
-115 |         bah;
-    |         ^^^ help: try: `Self::bah`
+  --> $DIR/issue-14254.rs:110:9
+   |
+LL |         bah;
+   |         ^^^ help: try: `Self::bah`
 
-error[E0601]: main function not found
+error: aborting due to 24 previous errors
 
-error: aborting due to 25 previous errors
-
+For more information about this error, try `rustc --explain E0425`.

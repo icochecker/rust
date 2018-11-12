@@ -18,7 +18,8 @@ use mem;
 use rc::Rc;
 use sync::Arc;
 use sys_common::{AsInner, IntoInner};
-use std_unicode::lossy::Utf8Lossy;
+use sys_common::bytestring::debug_fmt_bytestring;
+use core::str::lossy::Utf8Lossy;
 
 #[derive(Clone, Hash)]
 pub struct Buf {
@@ -31,7 +32,7 @@ pub struct Slice {
 
 impl fmt::Debug for Slice {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Debug::fmt(&Utf8Lossy::from_bytes(&self.inner), formatter)
+        debug_fmt_bytestring(&self.inner, formatter)
     }
 }
 
@@ -101,6 +102,11 @@ impl Buf {
     #[inline]
     pub fn shrink_to_fit(&mut self) {
         self.inner.shrink_to_fit()
+    }
+
+    #[inline]
+    pub fn shrink_to(&mut self, min_capacity: usize) {
+        self.inner.shrink_to(min_capacity)
     }
 
     pub fn as_slice(&self) -> &Slice {

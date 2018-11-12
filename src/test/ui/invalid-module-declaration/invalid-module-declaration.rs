@@ -9,9 +9,7 @@
 // except according to those terms.
 
 // ignore-tidy-linelength
-
-// error-pattern: cannot declare a new module at this location
-// error-pattern: maybe move this module
+// ignore-windows
 
 mod auxiliary {
     mod foo;

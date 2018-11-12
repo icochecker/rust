@@ -9,7 +9,6 @@
 // except according to those terms.
 
 // min-lldb-version: 310
-
 // compile-flags:-g
 
 // === GDB TESTS ===================================================================================
@@ -34,27 +33,60 @@
 // gdb-check:$6 = 20
 // gdb-command:continue
 
+// gdb-command:print x
+// gdb-check:$7 = 10.5
+// gdb-command:print y
+// gdb-check:$8 = 20
+// gdb-command:continue
+
+// gdb-command:print x
+// gdb-check:$9 = 11.5
+// gdb-command:print y
+// gdb-check:$10 = 20
+// gdb-command:continue
 
 // === LLDB TESTS ==================================================================================
 
 // lldb-command:run
 
 // lldb-command:print x
-// lldb-check:[...]$0 = false
+// lldbg-check:[...]$0 = false
+// lldbr-check:(bool) x = false
 // lldb-command:print y
-// lldb-check:[...]$1 = true
+// lldbg-check:[...]$1 = true
+// lldbr-check:(bool) y = true
 // lldb-command:continue
 
 // lldb-command:print x
-// lldb-check:[...]$2 = 10
+// lldbg-check:[...]$2 = 10
+// lldbr-check:(i32) x = 10
 // lldb-command:print y
-// lldb-check:[...]$3 = true
+// lldbg-check:[...]$3 = true
+// lldbr-check:(bool) y = true
 // lldb-command:continue
 
 // lldb-command:print x
-// lldb-check:[...]$4 = 10.5
+// lldbg-check:[...]$4 = 10.5
+// lldbr-check:(f64) x = 10.5
 // lldb-command:print y
-// lldb-check:[...]$5 = 20
+// lldbg-check:[...]$5 = 20
+// lldbr-check:(i32) y = 20
+// lldb-command:continue
+
+// lldb-command:print x
+// lldbg-check:[...]$6 = 10.5
+// lldbr-check:(f64) x = 10.5
+// lldb-command:print y
+// lldbg-check:[...]$7 = 20
+// lldbr-check:(i32) y = 20
+// lldb-command:continue
+
+// lldb-command:print x
+// lldbg-check:[...]$8 = 11.5
+// lldbr-check:(f64) x = 11.5
+// lldb-command:print y
+// lldbg-check:[...]$9 = 20
+// lldbr-check:(i32) y = 20
 // lldb-command:continue
 
 #![feature(omit_gdb_pretty_printer_section)]
@@ -77,6 +109,15 @@ fn main() {
 
     zzz(); // #break
     sentinel();
+
+    let x = {
+        zzz(); // #break
+        sentinel();
+        11.5
+    };
+
+    zzz(); // #break
+    sentinel()
 }
 
 fn zzz() {()}

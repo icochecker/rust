@@ -8,13 +8,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![allow(dead_code, missing_docs, bad_style)]
+#![allow(dead_code, missing_docs, nonstandard_style)]
 
 use io::{self, ErrorKind};
 
 pub use libc::strlen;
 pub use self::rand::hashmap_random_keys;
 
+#[path = "../unix/alloc.rs"]
+pub mod alloc;
 pub mod args;
 #[cfg(feature = "backtrace")]
 pub mod backtrace;

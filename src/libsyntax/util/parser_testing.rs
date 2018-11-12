@@ -9,23 +9,25 @@
 // except according to those terms.
 
 use ast::{self, Ident};
-use codemap::FilePathMapping;
-use parse::{ParseSess, PResult, filemap_to_stream};
+use source_map::FilePathMapping;
+use parse::{ParseSess, PResult, source_file_to_stream};
 use parse::{lexer, new_parser_from_source_str};
 use parse::parser::Parser;
 use ptr::P;
 use tokenstream::TokenStream;
 use std::iter::Peekable;
+use std::path::PathBuf;
 
 /// Map a string to tts, using a made-up filename:
 pub fn string_to_stream(source_str: String) -> TokenStream {
     let ps = ParseSess::new(FilePathMapping::empty());
-    filemap_to_stream(&ps, ps.codemap().new_filemap("bogofile".to_string(), source_str), None)
+    source_file_to_stream(&ps, ps.source_map()
+                             .new_source_file(PathBuf::from("bogofile").into(), source_str), None)
 }
 
 /// Map string to parser (via tts)
 pub fn string_to_parser<'a>(ps: &'a ParseSess, source_str: String) -> Parser<'a> {
-    new_parser_from_source_str(ps, "bogofile".to_string(), source_str)
+    new_parser_from_source_str(ps, PathBuf::from("bogofile").into(), source_str)
 }
 
 fn with_error_checking_parse<'a, T, F>(s: String, ps: &'a ParseSess, f: F) -> T where
@@ -61,20 +63,12 @@ pub fn string_to_item (source_str : String) -> Option<P<ast::Item>> {
     })
 }
 
-/// Parse a string, return a stmt
-pub fn string_to_stmt(source_str : String) -> Option<ast::Stmt> {
-    let ps = ParseSess::new(FilePathMapping::empty());
-    with_error_checking_parse(source_str, &ps, |p| {
-        p.parse_stmt()
-    })
-}
-
 /// Parse a string, return a pat. Uses "irrefutable"... which doesn't
 /// (currently) affect parsing.
 pub fn string_to_pat(source_str: String) -> P<ast::Pat> {
     let ps = ParseSess::new(FilePathMapping::empty());
     with_error_checking_parse(source_str, &ps, |p| {
-        p.parse_pat()
+        p.parse_pat(None)
     })
 }
 

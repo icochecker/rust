@@ -16,9 +16,9 @@
 // and make sure that the hash has changed, then change nothing between rev2 and
 // rev3 and make sure that the hash has not changed.
 
-// must-compile-successfully
+// compile-pass
 // revisions: cfail1 cfail2 cfail3
-// compile-flags: -Z query-dep-graph
+// compile-flags: -Z query-dep-graph -Zincremental-ignore-spans
 
 
 #![allow(warnings)]
@@ -49,7 +49,7 @@ pub fn add_type() {
 
 #[cfg(not(cfail1))]
 #[rustc_clean(cfg="cfail2",
-    except="HirBody,TypeckTables")]
+    except="HirBody,TypeckTables,MirValidated,MirOptimized")]
 #[rustc_clean(cfg="cfail3")]
 pub fn add_type() {
     let _x: u32 = 2u32;

@@ -21,9 +21,9 @@
 // results in a change of the ICH for the enum's metadata, and that it stays
 // the same between rev2 and rev3.
 
-// must-compile-successfully
+// compile-pass
 // revisions: cfail1 cfail2 cfail3
-// compile-flags: -Z query-dep-graph
+// compile-flags: -Z query-dep-graph -Zincremental-ignore-spans
 
 #![allow(warnings)]
 #![feature(rustc_attrs)]
@@ -651,5 +651,3 @@ mod change_trait_bound_indirectly_where {
         Variant1(T)
     }
 }
-
-
